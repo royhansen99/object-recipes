@@ -19,7 +19,7 @@ export declare class EntityClass<T extends Entity> {
     constructor(entity: T);
     set(changes: Partial<T>): EntityClass<T>;
     setPath<P extends Path<T, ''>>(path: P, value: PathValue<T, P>): EntityClass<T>;
-    recipe(recipeCallback: Recipe<typeof EntityClass>): this;
+    recipe(recipeCallback: Recipe<EntityClass<T>>): EntityClass<T>;
     get(): T;
     getClone(): T;
 }

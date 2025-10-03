@@ -25,7 +25,7 @@ export class EntityClass<T extends Entity> {
     return new EntityClass<T>(pathSet(this.entity, path, value));
   }
 
-  recipe(recipeCallback: Recipe<typeof this>) {
+  recipe(recipeCallback: Recipe<EntityClass<T>>) {
     return recipeCallback(this);
   }
 
