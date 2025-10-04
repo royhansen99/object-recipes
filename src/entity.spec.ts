@@ -70,6 +70,32 @@ describe('Entity tests', () => {
     expect(update.get().address).toEqual(expect.objectContaining({ country }));
   });
 
+  it('set() / setPath(): Identical values should return current instance with no changes', () => {
+    const person = entity({
+      name: 'Test',
+      age: 30,
+      address: {
+        street: 'Test road',
+        zip: 0,
+        country: '',
+      },
+    });
+
+    const setTest = person.set({ name: 'Test', age: 30 });
+
+    // Should be the same object, since values were identical,
+    // so no update needed.
+    expect(setTest.get()).toBe(person.get());
+    expect(setTest).toBe(person);
+
+    const setPathTest = person.setPath('address.street', 'Test road');
+
+    // Should be the same object, since values were identical,
+    // so no update needed.
+    expect(setPathTest.get()).toBe(person.get());
+    expect(setPathTest).toBe(person);
+  });
+
   it('recipe(): Use a recipe, test immutability', () => {
     const person = entity({
       name: '',

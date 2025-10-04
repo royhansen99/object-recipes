@@ -64,6 +64,10 @@ person.getClone();
 // set() returns a new entity-instance with updated fields,
 // without touching the original instance.
 //
+// If new values (all of them) are identical (Object.is) to
+// current values, there is no change happening, so the
+// current instance is returned unchanged.
+//
 // Argument is type-safe and will give errors if invalid.
 const update = person.set({ name: 'John Doe', age: 20 }).get();
 
@@ -73,6 +77,10 @@ person.set({ name: 'John Doe' }).set({ age: 20 }).get();
 // Update a single field in a nested path.
 // setPath() returns a new entity-instance with updated fields,
 // without touching the original instance.
+//
+// If the new value is identical (Object.is) to current value, there
+// is no change happening, so the current instance is returned
+// unchanged.
 //
 // Both path and value are type-safe and will give errors if invalid.
 const nestedUpdate = person.setPath('address.street', 'Teststreet 1').get();
