@@ -19,6 +19,9 @@ Can be used in combination with:
   (mostly only makes sense if using without RTK, because RTK already forces immer on you)
 - `Jotai` [Example here](src/example/JotaiExample.tsx)
 - `Zustand` [Example here](src/example/ZustandExample.tsx)
+- `Angular + NgRx` [Example here](src/example/AngularNgRxExample.md)
+- `Angular + rxjs` [Example here](src/example/AngularRxjsExample.md)
+- `Angular + signals` [Example here](src/example/AngularSignalExample.md)
 - anywhere else you can imagine! Doesn't need to be react or frontend-related!
 
 **object-recipes is tiny**!: (Even this README is much bigger than the library itself)  
