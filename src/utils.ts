@@ -12,6 +12,31 @@ export function deepClone<T>(source: T): T {
   return clone as T;
 }
 
+// Very fast deep equal (recursive) comparison of nested objects/arrays,
+// using Object.is() to compare leaf values.
+export function deepEqual<T>(a: T, b: T): boolean {
+  if (Object.is(a, b)) return true;
+
+  const [aType, bType] = [a, b].map((i) =>
+    i === null
+      ? 'null'
+      : Array.isArray(i)
+        ? 'array'
+        : typeof i === 'object'
+          ? 'object'
+          : 'other'
+  );
+
+  if (!['array', 'object'].includes(aType) || aType !== bType) return false;
+
+  for (const key of Object.keys(a as object)) {
+    if (!deepEqual(a[key as keyof typeof a], b[key as keyof typeof b]))
+      return false;
+  }
+
+  return true;
+}
+
 // Walk a list of paths (`list`) against `object`.
 //
 // If `compare` is `true`, we compare to check if

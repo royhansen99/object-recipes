@@ -12,17 +12,23 @@ declare type Entity = {
     [key: string]: any;
 };
 
-export declare function entity<T extends Entity>(entity: T): EntityClass<T>;
+export declare function entity<T extends Entity>(entity: T, config?: ConstructorParameters<typeof EntityClass<T>>[1]): EntityClass<T>;
 
 export declare class EntityClass<T extends Entity> {
     private entity;
-    constructor(entity: T);
-    set(changes: Partial<T>): EntityClass<T>;
-    setPath<P extends Path<T, ''>>(path: P, value: PathValue<T, P>): EntityClass<T>;
+    private equalityFn;
+    constructor(entity: T, config?: {
+        deepEqual?: boolean | EqualityFn;
+    });
+    private getEqualityFn;
+    set(changes: Partial<T>, deepEqual?: boolean | EqualityFn): EntityClass<T>;
+    setPath<P extends Path<T, ''>>(path: P, value: PathValue<T, P>, deepEqual?: boolean | EqualityFn): EntityClass<T>;
     recipe(recipeCallback: Recipe<EntityClass<T>>): EntityClass<T>;
-    get(): T;
-    getClone(): T;
+    get(): Readonly<T>;
+    getClone(): Writable<T>;
 }
+
+declare type EqualityFn = (a: any, b: any) => boolean;
 
 declare type ExcludeEmptyPath<T> = Exclude<T, ''>;
 
@@ -41,5 +47,9 @@ export declare type Recipe<T extends EntityClass<any>> = (entity: T) => T;
 export declare type Shape<T extends EntityClass<any>> = ReturnType<T['get']>;
 
 declare type UnaccessibleObjectType = Function | Map<any, any> | WeakMap<any, any> | Set<any> | WeakSet<any> | Date | RegExp | Error | Promise<any> | Symbol;
+
+declare type Writable<T> = {
+    -readonly [K in keyof T]: T[K];
+};
 
 export { }

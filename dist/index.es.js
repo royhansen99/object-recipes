@@ -1,46 +1,61 @@
-function a(e) {
-  if (e === null || typeof e != "object") return e;
-  const t = Array.isArray(e) ? [] : {};
-  for (const r in e)
-    Object.prototype.hasOwnProperty.call(e, r) && (t[r] = a(e[r]));
+function c(n) {
+  if (n === null || typeof n != "object") return n;
+  const t = Array.isArray(n) ? [] : {};
+  for (const r in n)
+    Object.prototype.hasOwnProperty.call(n, r) && (t[r] = c(n[r]));
   return t;
 }
-const c = (e, t, r, i = !1) => {
-  let n = e;
-  for (let l = 0; l < t.length; l++) {
-    const s = t[l];
-    if (n === null || typeof n != "object")
+function y(n, t) {
+  if (Object.is(n, t)) return !0;
+  const [r, i] = [n, t].map(
+    (e) => e === null ? "null" : Array.isArray(e) ? "array" : typeof e == "object" ? "object" : "other"
+  );
+  if (!["array", "object"].includes(r) || r !== i) return !1;
+  for (const e of Object.keys(n))
+    if (!y(n[e], t[e]))
+      return !1;
+  return !0;
+}
+const o = (n, t, r, i = !1) => {
+  let e = n;
+  for (let s = 0; s < t.length; s++) {
+    const l = t[s];
+    if (e === null || typeof e != "object")
       throw new Error(
         "One or more path levels are not valid. The entire nested structure you specified must be spreadable down to (but not including) the last item."
       );
-    const u = n[s];
-    if (l === t.length - 1)
+    const a = e[l];
+    if (s === t.length - 1)
       if (i) {
-        if (Object.is(u, r))
+        if (Object.is(a, r))
           return !0;
-      } else return n[s] = r, !0;
-    else !i && u !== null && typeof u == "object" && (n[s] = Array.isArray(n[s]) ? [...n[s]] : { ...n[s] });
-    n = n[s];
+      } else return e[l] = r, !0;
+    else !i && a !== null && typeof a == "object" && (e[l] = Array.isArray(e[l]) ? [...e[l]] : { ...e[l] });
+    e = e[l];
   }
   return !1;
-}, h = (e, t, r) => {
+}, h = (n, t, r) => {
   const i = t.replace(/\[([^\[\]]*)\]/g, ".$1").split(".");
-  if (c(e, i, r, !0)) return e;
-  const n = { ...e };
-  return c(n, i, r), n;
+  if (o(n, i, r, !0)) return n;
+  const e = { ...n };
+  return o(e, i, r), e;
 };
-class o {
-  constructor(t) {
-    this.entity = t;
+class u {
+  constructor(t, r) {
+    this.equalityFn = Object.is, this.entity = t, r != null && r.deepEqual && (this.equalityFn = r.deepEqual === !0 ? y : r.deepEqual);
   }
-  set(t) {
+  getEqualityFn(t) {
+    return t === void 0 ? this.equalityFn : t === !1 ? Object.is : t === !0 ? y : t;
+  }
+  set(t, r) {
+    const i = this.getEqualityFn(r);
     return Object.keys(t).filter(
-      (i) => !Object.is(t[i], this.entity[i])
-    ).length !== 0 ? new o({ ...this.entity, ...t }) : this;
+      (s) => !i(t[s], this.entity[s])
+    ).length !== 0 ? new u({ ...this.entity, ...t }) : this;
   }
-  setPath(t, r) {
-    const i = h(this.entity, t, r);
-    return Object.is(i, this.entity) ? this : new o(i);
+  setPath(t, r, i) {
+    const e = this.getEqualityFn(i), s = h(this.entity, t, r);
+    return e(s, this.entity) ? this : new u(s);
   }
   recipe(t) {
     return t(this);
@@ -49,13 +64,13 @@ class o {
     return this.entity;
   }
   getClone() {
-    return a(this.entity);
+    return c(this.entity);
   }
 }
-function y(e) {
-  return new o(e);
+function f(n, t) {
+  return new u(n, t);
 }
 export {
-  o as EntityClass,
-  y as entity
+  u as EntityClass,
+  f as entity
 };

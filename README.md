@@ -8,6 +8,8 @@ This can be useful when:
 
 You can perform nested updates by specifying the entire nested-path as a string (arrays also supported!), and have it updated immutably. The string is type-checked!
 
+It has a fast optional deep-equal comparator built-in, but uses Object.is by default. If an attempted change is equal to current values, simply return the current unchanged instance/object.
+
 This library includes full typings for projects that use typescript.
 An object/entity is immutable, so making any changes will return a new object/entity.
 
@@ -24,11 +26,11 @@ Can be used in combination with:
 - `Angular + signals` [Example here](src/example/AngularSignalExample.md)
 - anywhere else you can imagine! Doesn't need to be react or frontend-related!
 
-**object-recipes is tiny**!: (Even this README is much bigger than the library itself)  
-(minified at 2025/10/02)  
-- index.es.js (es): 0.62 kB (gzip) 
-- index.cjs.js (cjs): 0.59 kB (gzip) 
-- index.iife.js (iife): 0.61 kB (gzip) 
+**object-recipes is tiny**!: (Even this README is bigger than the library itself)  
+(minified at 2025/10/05)  
+- index.es.js (es): 0.93 kB (gzip) 
+- index.cjs.js (cjs): 0.86 kB (gzip) 
+- index.iife.js (iife): 0.88 kB (gzip) 
 
 ### Installation
 
@@ -48,6 +50,16 @@ const person = entity({
   address: { street: '', zip: 0, country: '' },
   activities: ['Skiing', 'Climbing', 'Skateboarding'],
 });
+// By default uses `Object.is` as a comparator to check
+// if an attempted update is not equal to the current value.
+// You can enable the built-in deepEqual or use your own
+// by passing a config parameter:
+// entity(someObject,
+//   { deepEqual: true } // true = built-in deepEqual
+// );
+// `true` uses the built-in deepEqual, if you want to use
+// a custom comparator-function you can simply pass that
+// instead of `true`.
 
 // Retrieve the plain js-object.
 // Note: If you modify this object directly, it will
@@ -67,6 +79,9 @@ person.getClone();
 // If new values (all of them) are identical (Object.is) to
 // current values, there is no change happening, so the
 // current instance is returned unchanged.
+// The comparator uses the global comparator on this entity,
+// but can be overridden by passing a second `deepEqual` argument
+// to set: entity(..).set({ .. }, true);
 //
 // Argument is type-safe and will give errors if invalid.
 const update = person.set({ name: 'John Doe', age: 20 }).get();
@@ -81,6 +96,9 @@ person.set({ name: 'John Doe' }).set({ age: 20 }).get();
 // If the new value is identical (Object.is) to current value, there
 // is no change happening, so the current instance is returned
 // unchanged.
+// The comparator uses the global comparator on this entity,
+// but can be overridden by passing a second `deepEqual` argument
+// to setPath: entity(..).setPath('..', value, true);
 //
 // Both path and value are type-safe and will give errors if invalid.
 const nestedUpdate = person.setPath('address.street', 'Teststreet 1').get();

@@ -96,6 +96,73 @@ describe('Entity tests', () => {
     expect(setPathTest).toBe(person);
   });
 
+  it('set() / setPath(): With `deepEqual` set', () => {
+    const person = entity(
+      {
+        name: 'Test',
+        age: 30,
+        address: {
+          street: 'Test road',
+          zip: 0,
+          country: '',
+        },
+      },
+      { deepEqual: true }
+    ); // deepEqual set "globally" for this entity.
+
+    // Expect set() to return the current instance without modifications
+    // since deep-equal returns true.
+    expect(person.set({ address: { ...person.get().address, zip: 0 } })).toBe(
+      person
+    );
+    expect(person.setPath('address', { ...person.get().address, zip: 0 })).toBe(
+      person
+    );
+
+    // When we disable deepEqual on set/setPath, should no longer be equal.
+    expect(
+      person.set(
+        { address: { ...person.get().address, zip: 0 } },
+        false // disable deepEqual
+      )
+    ).not.toBe(person);
+    expect(
+      person.setPath(
+        'address',
+        { ...person.get().address, zip: 0 },
+        false // disable deepEqual
+      )
+    ).not.toBe(person);
+
+    // When there actually is an update, a new instance should be returned.
+    expect(
+      person.set({ address: { ...person.get().address, zip: 40 } })
+    ).not.toBe(person);
+    expect(
+      person.setPath('address', { ...person.get().address, zip: 40 })
+    ).not.toBe(person);
+
+    // With `deepEqual` parameter directly on set/setPath.
+    // Should be equal, since no change according to deepEqual.
+    expect(
+      entity(person.get())
+        .set(
+          { address: { ...person.get().address } },
+          true // enable deepEqual
+        )
+        .get()
+    ).toBe(person.get());
+    expect(
+      entity(person.get())
+        .setPath(
+          'address',
+          { ...person.get().address },
+          true // enable deepEqual
+        )
+        .get()
+    ).toBe(person.get());
+  });
+
   it('recipe(): Use a recipe, test immutability', () => {
     const person = entity({
       name: '',
