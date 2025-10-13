@@ -112,7 +112,10 @@ export const pathSet = <T, P extends Path<T>>(
   path: P,
   value: PathValue<T, P>
 ): T => {
-  const list = path.replace(/\[([^\[\]]*)\]/g, '.$1').split('.');
+  const list = path
+    .replace(/\[([^\[\]]*)\]/g, '.$1')
+    .replace(/^\./, '')
+    .split('.');
 
   // If new value is equal to current value, simply
   // return the current object instead of
@@ -120,7 +123,9 @@ export const pathSet = <T, P extends Path<T>>(
   if (pathWalker(object, list, value, true)) return object;
 
   // Start spread/clone from the beginning.
-  const newObject: T = { ...object };
+  const newObject: T = Array.isArray(object)
+    ? ([...object] as T)
+    : { ...object };
 
   // Walk up the path trail by spreading/cloning every
   // level up to the final key.

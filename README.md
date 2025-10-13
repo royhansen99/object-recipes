@@ -112,6 +112,13 @@ const arrayUpdate = person.setPath('activities[0]', 'Downhill skiing').get();
 // ['Skiing', 'Climbing', 'Skateboarding', 'Fishing']
 const arrayAddUpdate = person.setPath('activities[3]', 'Fishing').get();
 
+// Does also work when the base object is an array.
+const arrayEntity = entity([{ value: 'Hello' }]);
+// Update value from `Hello` to `Hello sir!`
+arrayEntity.setPath('[0].value', 'Hello sir!');
+// set() will simply reset the entire entity to the new value, for arrays.
+arrayEntity.set([{ value: 'Something' }]);
+
 // Defining a recipe.
 const addressRecipe = (
   street: string, zip: number, country: string

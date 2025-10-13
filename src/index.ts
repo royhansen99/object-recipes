@@ -59,7 +59,9 @@ export class EntityClass<T extends Entity> {
     // instance.
     return !atLeastOneChange
       ? this
-      : new EntityClass<T>({ ...this.entity, ...changes });
+      : Array.isArray(this.entity)
+        ? new EntityClass<T>(changes as T)
+        : new EntityClass<T>({ ...this.entity, ...changes });
   }
 
   setPath<P extends Path<T, ''>>(

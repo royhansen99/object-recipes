@@ -163,6 +163,46 @@ describe('Entity tests', () => {
     ).toBe(person.get());
   });
 
+  it('set/setPath when base entity is an array', () => {
+    const test = entity([
+      { strValue: 'Hello!', numValue: 100, array: [1, 2, 3] },
+    ]);
+
+    // Update value inside first element
+    expect(
+      test.setPath('[0].strValue', 'Testing').get()[0].strValue
+    ).toStrictEqual('Testing');
+
+    // Update value inside first element
+    expect(test.setPath('[0].array[3]', 600).get()[0].array).toStrictEqual([
+      1, 2, 3, 600,
+    ]);
+
+    // Update entire first element
+    expect(
+      test.setPath('[0]', { ...test.get()[0], numValue: 777, array: [0] }).get()
+    ).toStrictEqual([{ ...test.get()[0], numValue: 777, array: [0] }]);
+
+    // Add new element
+    expect(
+      test
+        .setPath('[1]', { strValue: 'New element', numValue: 777, array: [0] })
+        .get()
+    ).toStrictEqual([
+      test.get()[0],
+      { strValue: 'New element', numValue: 777, array: [0] },
+    ]);
+
+    // set() will simply reset/update the entire entity,
+    // since partial updates wont work on arrays.
+    expect(
+      test.set([{ strValue: 'Testing', numValue: 29, array: [1, 2, 3] }]).get()
+    ).toStrictEqual([{ strValue: 'Testing', numValue: 29, array: [1, 2, 3] }]);
+
+    // With deep-equal, should return the same instance unchanged, since there is no change.
+    expect(test.set(test.getClone(), true)).toBe(test);
+  });
+
   it('recipe(): Use a recipe, test immutability', () => {
     const person = entity({
       name: '',
