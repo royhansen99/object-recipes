@@ -17,7 +17,7 @@ Also a good alternative to `immer`, and much more lightweight!
 Can be used in combination with:
 - `React useState()` [Example here](src/example/UseStateExample.tsx)
 - `React useReducer()` [Example here](src/example/UseReducerExample.tsx)
-- `Redux` [Example here](src/example/UseReducerExample.tsx)  
+- `Redux` [Example here](src/example/ReduxExample.tsx)  
   (mostly only makes sense if using without RTK, because RTK already forces immer on you)
 - `Jotai` [Example here](src/example/JotaiExample.tsx)
 - `Zustand` [Example here](src/example/ZustandExample.tsx)
