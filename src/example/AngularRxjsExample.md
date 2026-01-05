@@ -34,7 +34,7 @@ export const setAddressAction =
       address: { ...entity.get().address, ...values },
     });
 
-export const personState = new BehaviorSubject(personEntity);
+export const personState = new BehaviorSubject(personEntity.get());
 ```
 
 ```ts
@@ -45,16 +45,18 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { map } from 'rxjs';
+import { recipe } from 'object-recipes';
 import {
   personState,
   setNameAgeAction,
   setAddressAction,
-} from './store/person';
+} from '../store/person';
 
 @Component({
-  selector: 'person-behavior-subject-component',
+  selector: 'person-rxjs-component',
   imports: [CommonModule, FormsModule],
   template: `
+    <h1>Person: Rxjs</h1>
     Hello! {{ name$ | async }}
     <br />
     {{ address$ | async | json }}
@@ -95,34 +97,32 @@ import {
     /><br />
   `,
 })
-export class PersonBehaviorSubjectComponent {
+export class PersonRxjsComponent {
   private person = personState;
   private person$ = this.person.asObservable();
 
-  name$ = this.person$.pipe(map((entity) => entity.get().name));
+  name$ = this.person$.pipe(map(({ name }) => name));
 
   age$ = this.person$.pipe(
-    map((entity) => {
-      const age = entity.get().age;
-
+    map(({ age }) => {
       return isNaN(age) ? '' : age.toString();
     })
   );
 
-  address$ = this.person$.pipe(map((entity) => entity.get().address));
+  address$ = this.person$.pipe(map(({ address }) => address));
 
   setName(name: string) {
-    this.person.next(this.person.value.recipe(setNameAgeAction({ name })));
+    this.person.next(recipe(setNameAgeAction({ name }))(this.person.value));
   }
 
   setAge(age: string) {
     this.person.next(
-      this.person.value.recipe(setNameAgeAction({ age: parseInt(age) }))
+      recipe(setNameAgeAction({ age: parseInt(age) }))(this.person.value)
     );
   }
 
   setAddress(address: Parameters<typeof setAddressAction>[0]) {
-    this.person.next(this.person.value.recipe(setAddressAction(address)));
+    this.person.next(recipe(setAddressAction(address))(this.person.value));
   }
 }
 ```

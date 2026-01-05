@@ -34,7 +34,7 @@ export const setAddressAction =
       address: { ...entity.get().address, ...values },
     });
 
-export const personSignal = signal(personEntity);
+export const personSignal = signal(personEntity.get());
 ```
 
 ```ts
@@ -44,16 +44,18 @@ export const personSignal = signal(personEntity);
 import { Component, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { recipe } from 'object-recipes';
 import {
   personSignal,
   setNameAgeAction,
   setAddressAction,
-} from './store/person';
+} from '../store/person';
 
 @Component({
   selector: 'person-signal-component',
   imports: [CommonModule, FormsModule],
   template: `
+    <h1>Person: Signal</h1>
     Hello! {{ name() }}
     <br />
     {{ address() | json }}
@@ -97,25 +99,25 @@ import {
 export class PersonSignalComponent {
   private person = personSignal;
 
-  name = computed(() => this.person().get().name);
+  name = computed(() => this.person().name);
 
   age = computed(() => {
-    const age = this.person().get().age;
+    const age = this.person().age;
     return isNaN(age) ? '' : age.toString();
   });
 
-  address = computed(() => this.person().get().address);
+  address = computed(() => this.person().address);
 
   setName(name: string) {
-    this.person.update(setNameAgeAction({ name }));
+    this.person.update(recipe(setNameAgeAction({ name })));
   }
 
   setAge(age: string) {
-    this.person.update(setNameAgeAction({ age: parseInt(age) }));
+    this.person.update(recipe(setNameAgeAction({ age: parseInt(age) })));
   }
 
   setAddress(address: Parameters<typeof setAddressAction>[0]) {
-    this.person.update(setAddressAction(address));
+    this.person.update(recipe(setAddressAction(address)));
   }
 }
 ```

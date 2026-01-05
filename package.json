@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "object-recipes",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "A tiny javascript/typescript library for modifying large deeply-nested objects in a immutable, type-safe and composable manner.",
   "license": "MIT",
   "repository": "github:royhansen99/object-recipes",

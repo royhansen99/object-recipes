@@ -5,10 +5,10 @@ This example was created on Angular v20.3.0, and NgRx v20.0.1.
 ```ts
 /* src/state/person.ts  */
 
-import { Store, createReducer, createAction, on, props } from '@ngrx/store';
-import { entity, Recipe, Shape } from 'object-recipes';
+import { createReducer, createAction, on, props } from '@ngrx/store';
+import { entity, recipe as recipeHelper, Recipe, Shape } from 'object-recipes';
 
-const personEntity = entity({
+export const personEntity = entity({
   name: 'John Doe',
   age: 20,
   address: {
@@ -17,8 +17,6 @@ const personEntity = entity({
     country: 'Some country',
   },
 });
-
-export type PersonEntity = typeof personEntity;
 
 export type Person = Shape<typeof personEntity>;
 
@@ -38,29 +36,29 @@ export const setAddressAction =
       address: { ...entity.get().address, ...values },
     });
 
-export const recipe = createAction(
+export const action = createAction(
   '[personEntity] recipe',
   props<{ recipe: Recipe<typeof personEntity> }>()
 );
-
-export const personReducer = createReducer(
-  personEntity,
-  on(recipe, (state, { recipe }) => state.recipe(recipe))
+export const personStoreReducer = createReducer(
+  personEntity.get(),
+  on(action, (state, { recipe }) => recipeHelper(recipe)(state))
 );
 ```
 
 ```ts
 /* src/state/index.ts */
+
 import { provideStore, provideState } from '@ngrx/store';
-import { PersonEntity, personReducer } from './person';
+import { Person, personStoreReducer } from './person';
 
 export interface StoreState {
-  person: PersonEntity;
+  person: Person;
 }
 
 export const stateProvider = [
   provideStore<StoreState>(),
-  provideState('person', personReducer),
+  provideState('person', personStoreReducer),
 ];
 ```
 
@@ -94,14 +92,14 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { StoreState } from './store';
-import { recipe, setNameAgeAction, setAddressAction } from './store/person';
+import { StoreState } from '../store';
+import { action, setNameAgeAction, setAddressAction } from '../store/person';
 
 @Component({
-  selector: 'person-component',
+  selector: 'person-ngrx-component',
   imports: [CommonModule, FormsModule],
   template: `
+    <h1>Person: NgRx</h1>
     Hello! {{ name$ | async }}
     <br />
     {{ address$ | async | json }}
@@ -142,18 +140,19 @@ import { recipe, setNameAgeAction, setAddressAction } from './store/person';
     /><br />
   `,
 })
-export class PersonComponent {
+export class PersonNgRxComponent {
   store: Store<StoreState> = inject(Store<StoreState>);
-  name$ = this.store.select(({ person }) => person.get().name);
+  name$ = this.store.select(({ person }) => person.name);
   age$ = this.store.select(({ person }) => {
-    const age = person.get().age;
+    const age = person.age;
 
     return isNaN(age) ? '' : age.toString();
   });
-  address$ = this.store.select(({ person }) => person.get().address);
+  address$ = this.store.select(({ person }) => person.address);
+
   setName(name: string) {
     this.store.dispatch(
-      recipe({
+      action({
         recipe: setNameAgeAction({ name }),
       })
     );
@@ -161,7 +160,7 @@ export class PersonComponent {
 
   setAge(age: string) {
     this.store.dispatch(
-      recipe({
+      action({
         recipe: setNameAgeAction({ age: parseInt(age) }),
       })
     );
@@ -169,7 +168,7 @@ export class PersonComponent {
 
   setAddress(address: Parameters<typeof setAddressAction>[0]) {
     this.store.dispatch(
-      recipe({
+      action({
         recipe: setAddressAction(address),
       })
     );

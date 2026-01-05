@@ -6,7 +6,7 @@ import {
   useDispatch,
   TypedUseSelectorHook,
 } from 'react-redux';
-import { entity, Recipe, Shape } from '../index';
+import { entity, recipe, Recipe, Shape } from '../index';
 
 const personEntity = entity({
   name: 'John Doe',
@@ -26,28 +26,30 @@ type Action = {
 const setNameAgeAction = (
   values: Partial<Pick<Shape<typeof personEntity>, 'name' | 'age'>>
 ): Action => ({
-  type: 'setNameAge',
+  type: 'person.setNameAge',
   recipe: (entity) => entity.set(values),
 });
 
 const setAddressAction = (
   values: Partial<Shape<typeof personEntity>['address']>
 ): Action => ({
-  type: 'setAddress',
+  type: 'person.setAddress',
   recipe: (entity) =>
     entity.set({
       address: { ...entity.get().address, ...values },
     }),
 });
 
-const reducer = (entity = personEntity, action?: Action) =>
-  action?.recipe ? entity.recipe(action.recipe) : entity;
+const reducer = (entity = personEntity.get(), action?: Action) =>
+  action?.recipe && action.type.startsWith('person.')
+    ? recipe(action.recipe)(entity)
+    : entity;
 
 declare const window: {
   __REDUX_DEVTOOLS_EXTENSION__?: () => StoreEnhancer;
 };
 
-const store = createStore<typeof personEntity, Action>(
+const store = createStore<Shape<typeof personEntity>, Action>(
   reducer,
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 );
@@ -57,7 +59,7 @@ const appSelector: TypedUseSelectorHook<ReturnType<typeof store.getState>> =
 const appDispatch: () => typeof store.dispatch = useDispatch;
 
 function Example() {
-  const { name, age, address } = appSelector((person) => person.get());
+  const { name, age, address } = appSelector((person) => person);
   const dispatch = appDispatch();
 
   return (
