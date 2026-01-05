@@ -1,6 +1,6 @@
 import React from 'react';
 import { atom, useAtom } from 'jotai';
-import { entity, Recipe } from '../index';
+import { entity, Recipe, recipe } from '../index';
 
 const personEntity = entity({
   name: 'John Doe',
@@ -25,11 +25,10 @@ const addressRecipe =
       address: { ...entity.get().address, ...values },
     });
 
-const personAtom = atom(personEntity);
+const personAtom = atom(personEntity.get());
 
 export default function JotaiExample() {
-  const [person, setPerson] = useAtom(personAtom);
-  const { name, age, address } = person.get();
+  const [{ name, age, address }, setPerson] = useAtom(personAtom);
 
   return (
     <div>
@@ -39,7 +38,7 @@ export default function JotaiExample() {
         type="text"
         value={name}
         onChange={({ currentTarget: { value } }) =>
-          setPerson((e) => e.set({ name: value }))
+          setPerson(recipe((e) => e.set({ name: value })))
         }
       />
       <br />
@@ -48,7 +47,7 @@ export default function JotaiExample() {
         type="text"
         value={isNaN(age) ? '' : age.toString()}
         onChange={({ currentTarget: { value } }) =>
-          setPerson((e) => e.set({ age: parseInt(value) }))
+          setPerson(recipe((e) => e.set({ age: parseInt(value) })))
         }
       />
       <br />
@@ -60,7 +59,7 @@ export default function JotaiExample() {
         type="text"
         value={address.street}
         onChange={({ currentTarget: { value } }) =>
-          setPerson(addressRecipe({ street: value }))
+          setPerson(recipe(addressRecipe({ street: value })))
         }
       />
       <br />
@@ -69,7 +68,7 @@ export default function JotaiExample() {
         type="text"
         value={isNaN(address.zip) ? '' : address.zip.toString()}
         onChange={({ currentTarget: { value } }) =>
-          setPerson(addressRecipe({ zip: parseInt(value) }))
+          setPerson(recipe(addressRecipe({ zip: parseInt(value) })))
         }
       />
       <br />
@@ -78,7 +77,7 @@ export default function JotaiExample() {
         type="text"
         value={address.country}
         onChange={({ currentTarget: { value } }) =>
-          setPerson(addressRecipe({ country: value }))
+          setPerson(recipe(addressRecipe({ country: value })))
         }
       />
       <br />
