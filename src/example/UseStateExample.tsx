@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { entity, Recipe } from '../index';
+import { entity, Recipe, recipe } from '../index';
 
 const personEntity = entity({
   name: 'John Doe',
@@ -25,8 +25,7 @@ const addressRecipe =
     });
 
 export default function UseStateExample() {
-  const [person, setPerson] = useState(personEntity);
-  const { name, age, address } = person.get();
+  const [{ name, age, address }, setPerson] = useState(personEntity.get());
 
   return (
     <div>
@@ -36,7 +35,7 @@ export default function UseStateExample() {
         type="text"
         value={name}
         onChange={({ currentTarget: { value } }) =>
-          setPerson((p) => p.set({ name: value }))
+          setPerson(recipe((p) => p.set({ name: value })))
         }
       />
       <br />
@@ -45,7 +44,7 @@ export default function UseStateExample() {
         type="text"
         value={isNaN(age) ? '' : age.toString()}
         onChange={({ currentTarget: { value } }) =>
-          setPerson((p) => p.set({ age: parseInt(value) }))
+          setPerson(recipe((p) => p.set({ age: parseInt(value) })))
         }
       />
       <br />
@@ -57,7 +56,7 @@ export default function UseStateExample() {
         type="text"
         value={address.street}
         onChange={({ currentTarget: { value } }) =>
-          setPerson(addressRecipe({ street: value }))
+          setPerson(recipe(addressRecipe({ street: value })))
         }
       />
       <br />
@@ -66,7 +65,7 @@ export default function UseStateExample() {
         type="text"
         value={isNaN(address.zip) ? '' : address.zip.toString()}
         onChange={({ currentTarget: { value } }) =>
-          setPerson(addressRecipe({ zip: parseInt(value) }))
+          setPerson(recipe(addressRecipe({ zip: parseInt(value) })))
         }
       />
       <br />
@@ -75,7 +74,7 @@ export default function UseStateExample() {
         type="text"
         value={address.country}
         onChange={({ currentTarget: { value } }) =>
-          setPerson(addressRecipe({ country: value }))
+          setPerson(recipe(addressRecipe({ country: value })))
         }
       />
       <br />

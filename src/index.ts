@@ -97,3 +97,12 @@ export function entity<T extends Entity>(
 ) {
   return new EntityClass<T>(entity, config);
 }
+
+// Convenience wrapper/helper when you want to run recipes through
+// an external state-library setter.
+export const recipe =
+  <T extends Entity>(...recipes: Recipe<EntityClass<T>>[]) =>
+  (value: T) =>
+    recipes
+      .reduce((_entity, recipe) => _entity.recipe(recipe), entity(value))
+      .get();

@@ -44,6 +44,8 @@ declare type PathValue<T, P extends string = ''> = ArrayPathValue<T, P> extends 
 
 export declare type Recipe<T extends EntityClass<any>> = (entity: T) => T;
 
+export declare const recipe: <T extends Entity>(...recipes: Recipe<EntityClass<T>>[]) => (value: T) => Readonly<T>;
+
 export declare type Shape<T extends EntityClass<any>> = ReturnType<T['get']>;
 
 declare type UnaccessibleObjectType = Function | Map<any, any> | WeakMap<any, any> | Set<any> | WeakSet<any> | Date | RegExp | Error | Promise<any> | Symbol;
