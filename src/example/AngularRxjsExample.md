@@ -35,6 +35,13 @@ export const setAddressAction =
     });
 
 export const personState = new BehaviorSubject(personEntity.get());
+
+export const personDispatch = (recipe: Recipe<typeof personEntity>) => {
+  personState.next(
+    recipeHelper(recipe)(personState.value)
+  );
+};
+
 ```
 
 ```ts
@@ -48,6 +55,7 @@ import { map } from 'rxjs';
 import { recipe } from 'object-recipes';
 import {
   personState,
+  personDispatch,
   setNameAgeAction,
   setAddressAction,
 } from '../store/person';
@@ -112,17 +120,21 @@ export class PersonRxjsComponent {
   address$ = this.person$.pipe(map(({ address }) => address));
 
   setName(name: string) {
-    this.person.next(recipe(setNameAgeAction({ name }))(this.person.value));
+    personDispatch(
+      setNameAgeAction({ name })
+    );
   }
 
   setAge(age: string) {
-    this.person.next(
-      recipe(setNameAgeAction({ age: parseInt(age) }))(this.person.value)
+    personDispatch(
+      setNameAgeAction({ age: parseInt(age) })
     );
   }
 
   setAddress(address: Parameters<typeof setAddressAction>[0]) {
-    this.person.next(recipe(setAddressAction(address))(this.person.value));
+    personDispatch(
+      setAddressAction(address)
+    );
   }
 }
 ```
