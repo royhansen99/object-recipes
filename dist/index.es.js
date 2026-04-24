@@ -1,61 +1,71 @@
-function c(e) {
-  if (e === null || typeof e != "object") return e;
-  const t = Array.isArray(e) ? [] : {};
-  for (const r in e)
-    Object.prototype.hasOwnProperty.call(e, r) && (t[r] = c(e[r]));
+function h(r) {
+  if (r === null || typeof r != "object") return r;
+  const t = Array.isArray(r) ? [] : {};
+  for (const e in r)
+    Object.prototype.hasOwnProperty.call(r, e) && (t[e] = h(r[e]));
   return t;
 }
-function y(e, t) {
-  if (Object.is(e, t)) return !0;
-  const [r, i] = [e, t].map(
+function o(r, t) {
+  if (Object.is(r, t)) return !0;
+  const [e, i] = [r, t].map(
     (n) => n === null ? "null" : Array.isArray(n) ? "array" : typeof n == "object" ? "object" : "other"
   );
-  if (!["array", "object"].includes(r) || r !== i) return !1;
-  for (const n of Object.keys(e))
-    if (!y(e[n], t[n]))
+  if (!["array", "object"].includes(e) || e !== i) return !1;
+  for (const n of Object.keys(r))
+    if (!o(r[n], t[n]))
       return !1;
   return !0;
 }
-const o = (e, t, r, i = !1) => {
-  let n = e;
+const l = (r, t, e, i = !1) => {
+  let n = r;
   for (let s = 0; s < t.length; s++) {
-    const l = t[s];
+    const u = t[s];
     if (n === null || typeof n != "object")
       throw new Error(
         "One or more path levels are not valid. The entire nested structure you specified must be spreadable down to (but not including) the last item."
       );
-    const a = n[l];
+    const a = n[u];
     if (s === t.length - 1)
       if (i) {
-        if (Object.is(a, r))
+        if (Object.is(a, e))
           return !0;
-      } else return n[l] = r, !0;
-    else !i && a !== null && typeof a == "object" && (n[l] = Array.isArray(n[l]) ? [...n[l]] : { ...n[l] });
-    n = n[l];
+      } else return n[u] = e, !0;
+    else !i && a !== null && typeof a == "object" && (n[u] = Array.isArray(n[u]) ? [...n[u]] : { ...n[u] });
+    n = n[u];
   }
   return !1;
-}, h = (e, t, r) => {
+}, c = (r, t, e) => {
   const i = t.replace(/\[([^\[\]]*)\]/g, ".$1").replace(/^\./, "").split(".");
-  if (o(e, i, r, !0)) return e;
-  const n = Array.isArray(e) ? [...e] : { ...e };
-  return o(n, i, r), n;
+  if (!t.length) return e;
+  if (l(r, i, e, !0)) return r;
+  const n = Array.isArray(r) ? [...r] : { ...r };
+  return l(n, i, e), n;
+}, f = (r, t, e) => {
+  if (!t.length) return e;
+  if (l(r, t, e, !0)) return r;
+  const i = Array.isArray(r) ? [...r] : { ...r };
+  return l(i, t, e), i;
 };
-class u {
-  constructor(t, r) {
-    this.equalityFn = Object.is, this.entity = t, r != null && r.deepEqual && (this.equalityFn = r.deepEqual === !0 ? y : r.deepEqual);
+class y {
+  constructor(t, e) {
+    this.equalityFn = Object.is, this.entity = t, e != null && e.deepEqual && (this.equalityFn = e.deepEqual === !0 ? o : e.deepEqual);
   }
   getEqualityFn(t) {
-    return t === void 0 ? this.equalityFn : t === !1 ? Object.is : t === !0 ? y : t;
+    return t === void 0 ? this.equalityFn : t === !1 ? Object.is : t === !0 ? o : t;
   }
-  set(t, r) {
-    const i = this.getEqualityFn(r);
-    return Object.keys(t).filter(
+  set(t, e) {
+    const i = this.getEqualityFn(e);
+    return Array.isArray(this.entity) ? i(this.entity, t) ? this : new y(t) : Object.keys(t).filter(
       (s) => !i(t[s], this.entity[s])
-    ).length !== 0 ? Array.isArray(this.entity) ? new u(t) : new u({ ...this.entity, ...t }) : this;
+    ).length !== 0 ? Array.isArray(this.entity) ? new y(t) : new y({ ...this.entity, ...t }) : this;
   }
-  setPath(t, r, i) {
-    const n = this.getEqualityFn(i), s = h(this.entity, t, r);
-    return n(s, this.entity) ? this : new u(s);
+  setPath(t, e, i) {
+    const n = this.getEqualityFn(i), s = c(this.entity, t, e);
+    return n(s, this.entity) ? this : new y(s);
+  }
+  setKeysPath(t, e, i) {
+    const n = this.getEqualityFn(i), s = f(this.entity, t, e);
+    return n(s, this.entity) ? this : new y(s);
   }
   recipe(t) {
     return t(this);
@@ -64,15 +74,15 @@ class u {
     return this.entity;
   }
   getClone() {
-    return c(this.entity);
+    return h(this.entity);
   }
 }
-function f(e, t) {
-  return new u(e, t);
+function p(r, t) {
+  return new y(r, t);
 }
-const p = (...e) => (t) => e.reduce((r, i) => r.recipe(i), f(t)).get();
+const A = (...r) => (t) => r.reduce((e, i) => e.recipe(i), p(t)).get();
 export {
-  u as EntityClass,
-  f as entity,
-  p as recipe
+  y as EntityClass,
+  p as entity,
+  A as recipe
 };

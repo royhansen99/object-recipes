@@ -1,4 +1,4 @@
-import { Path, PathValue } from './types';
+import { Path, PathValue, StringPath, StringPathValue } from './types';
 
 export function deepClone<T>(source: T): T {
   if (source === null || typeof source !== 'object') return source;
@@ -104,18 +104,22 @@ const pathWalker = <T>(
   return false;
 };
 
-// Update string-path on an object with a new value.
+type TObj = { [key: string | number]: unknown } | unknown[];
+
+// Update STRING-path on an object with a new value.
 // The update is immutable and will return a spread
 // of the affected paths.
-export const pathSet = <T, P extends Path<T>>(
+export const pathSet = <const T extends TObj, const P extends StringPath<T>>(
   object: T,
   path: P,
-  value: PathValue<T, P>
+  value: StringPathValue<T, P>
 ): T => {
-  const list = path
+  const list = (path as string)
     .replace(/\[([^\[\]]*)\]/g, '.$1')
     .replace(/^\./, '')
     .split('.');
+
+  if(!path.length) return value as T;
 
   // If new value is equal to current value, simply
   // return the current object instead of
@@ -130,6 +134,33 @@ export const pathSet = <T, P extends Path<T>>(
   // Walk up the path trail by spreading/cloning every
   // level up to the final key.
   pathWalker(newObject, list, value);
+
+  return newObject;
+};
+
+// Update ARRAY-path on an object with a new value.
+// The update is immutable and will return a spread
+// of the affected paths.
+export const pathKeysSet = <const T extends TObj, const P extends Path<T>>(
+  object: T,
+  path: P,
+  value: PathValue<T, P>
+): T => {
+  if(!path.length) return value as T;
+
+  // If new value is equal to current value, simply
+  // return the current object instead of
+  // spreading/cloning.
+  if (pathWalker(object, path as string[], value, true)) return object;
+
+  // Start spread/clone from the beginning.
+  const newObject: T = Array.isArray(object)
+    ? ([...object] as T)
+    : { ...object };
+
+  // Walk up the path trail by spreading/cloning every
+  // level up to the final key.
+  pathWalker(newObject, path as string[], value);
 
   return newObject;
 };

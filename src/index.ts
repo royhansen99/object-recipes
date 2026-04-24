@@ -1,8 +1,7 @@
-import { Path, PathValue } from './types';
-import { deepClone, deepEqual as deepEqualFn, pathSet } from './utils';
+import { Path, PathValue, StringPath, StringPathValue } from './types';
+import { deepClone, deepEqual as deepEqualFn, pathSet, pathKeysSet } from './utils';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Entity = { [key: string]: any };
+type Entity = { [key: string | number]: unknown } | unknown[];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Recipe<T extends EntityClass<any>> = (entity: T) => T;
@@ -16,7 +15,7 @@ type Writable<T> = { -readonly [K in keyof T]: T[K] };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EqualityFn = (a: any, b: any) => boolean;
 
-export class EntityClass<T extends Entity> {
+export class EntityClass<const T extends Entity> {
   // Set entity-object as read-only.
   // The Readonly<T> type is not recursive, so does not provide
   // complete type-safety below the root of the object. But
@@ -44,33 +43,62 @@ export class EntityClass<T extends Entity> {
           : deepEqual;
   }
 
-  set(changes: Partial<T>, deepEqual?: boolean | EqualityFn) {
+  set(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    changes: T extends any[] ? T : Partial<T>,
+    deepEqual?: boolean | EqualityFn
+  ) {
     const _equalityFn = this.getEqualityFn(deepEqual);
 
-    // At least one of the changes is not identical to the current
-    // values.
-    const atLeastOneChange =
-      Object.keys(changes).filter(
-        (key) => !_equalityFn(changes[key], this.entity[key])
-      ).length !== 0;
+    if(Array.isArray(this.entity)) {
+      return _equalityFn(this.entity, changes) ?
+        this : new EntityClass<T>(changes as T);
+    } else {
+      // At least one of the changes is not identical to the current
+      // values.
+      const atLeastOneChange =
+        Object.keys(changes).filter(
+          (key) => !_equalityFn(changes[key as keyof typeof changes], this.entity[key as keyof typeof entity])
+        ).length !== 0;
 
-    // If all changes are identical to current values we simply
-    // return the current instance, else we spread into a new
-    // instance.
-    return !atLeastOneChange
-      ? this
-      : Array.isArray(this.entity)
-        ? new EntityClass<T>(changes as T)
-        : new EntityClass<T>({ ...this.entity, ...changes });
+      // If all changes are identical to current values we simply
+      // return the current instance, else we spread into a new
+      // instance.
+      return !atLeastOneChange
+        ? this
+        : Array.isArray(this.entity)
+          ? new EntityClass<T>(changes as T)
+          : new EntityClass<T>({ ...this.entity, ...changes });
+    }
   }
 
-  setPath<P extends Path<T, ''>>(
+  setPath<P extends StringPath<T>>(
+    path: P,
+    value: StringPathValue<T, P>,
+    deepEqual?: boolean | EqualityFn
+  ) {
+    const _equalityFn = this.getEqualityFn(deepEqual);
+    const trySet = pathSet(this.entity, path, value);
+
+    // If change is identical to current value we simply
+    // return the current instance, else we spread into a new
+    // instance.
+    return _equalityFn(trySet, this.entity) ? this : new EntityClass<T>(trySet);
+  }
+
+  setKeysPath<const P extends Path<T>>(
     path: P,
     value: PathValue<T, P>,
     deepEqual?: boolean | EqualityFn
   ) {
     const _equalityFn = this.getEqualityFn(deepEqual);
-    const trySet = pathSet(this.entity, path, value);
+
+    // This line leads to "excessive depth limit error", and there really
+    // does not seem to be a way around it.
+    // But we already type checked the argument to the parent function, so
+    // it's fine to ignore.
+    // @ts-expect-error "Excessive depth limit expected"
+    const trySet = pathKeysSet<T, P>(this.entity, path, value);
 
     // If change is identical to current value we simply
     // return the current instance, else we spread into a new
@@ -101,7 +129,7 @@ export function entity<T extends Entity>(
 // Convenience wrapper/helper when you want to run recipes through
 // an external state-library setter.
 export const recipe =
-  <T extends Entity>(...recipes: Recipe<EntityClass<T>>[]) =>
+  <const T extends Entity>(...recipes: Recipe<EntityClass<T>>[]) =>
   (value: T) =>
     recipes
       .reduce((_entity, recipe) => _entity.recipe(recipe), entity(value))

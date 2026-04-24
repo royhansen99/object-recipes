@@ -70,7 +70,58 @@ describe('Entity tests', () => {
     expect(update.get().address).toEqual(expect.objectContaining({ country }));
   });
 
-  it('set() / setPath(): Identical values should return current instance with no changes', () => {
+  it('setKeysPath(): Initialize entity, assign values, test immutability', () => {
+    const person = entity({
+      name: '',
+      age: 0,
+      address: {
+        street: '',
+        zip: 0,
+        country: '',
+      },
+    });
+
+    const name = 'John Doe';
+    const age = 20;
+    const country = 'Norway';
+
+    const update = person
+      .setKeysPath(['name'], name)
+      .setKeysPath(['age'], age)
+      .setKeysPath(['address', 'country'], country);
+
+    // `person` should remain untouched after the `setKeysPath` operations,
+    // because of immutability.
+    expect(person.get()).not.toEqual(expect.objectContaining({ name, age }));
+    expect(person.get().address).not.toEqual(
+      expect.objectContaining({ country })
+    );
+
+    // `update` should contain the new object with the updated
+    // values.
+    expect(update.get()).toEqual(expect.objectContaining({ name, age }));
+    expect(update.get().address).toEqual(expect.objectContaining({ country }));
+  });
+
+  it('setPath()/setKeysPath(): Set top-level/root value', () => {
+    const item = entity({
+      num: 0,
+      str: '',
+      arr: [1, 2]
+    });
+
+    const update = () => ({
+      num: 3,
+      str: 'test',
+      arr: [10]
+    });
+
+    expect(item.setKeysPath([], update()).get()).toStrictEqual(update());
+
+    expect(item.setPath('', update()).get()).toStrictEqual(update());
+  });
+
+  it('set() / setPath() / setKeysPath(): Identical values should return current instance with no changes', () => {
     const person = entity({
       name: 'Test',
       age: 30,
@@ -94,6 +145,13 @@ describe('Entity tests', () => {
     // so no update needed.
     expect(setPathTest.get()).toBe(person.get());
     expect(setPathTest).toBe(person);
+
+    const setKeysPathTest = person.setKeysPath(['address', 'street'], 'Test road');
+
+    // Should be the same object, since values were identical,
+    // so no update needed.
+    expect(setKeysPathTest.get()).toBe(person.get());
+    expect(setKeysPathTest).toBe(person);
   });
 
   it('set() / setPath(): With `deepEqual` set', () => {
@@ -118,8 +176,11 @@ describe('Entity tests', () => {
     expect(person.setPath('address', { ...person.get().address, zip: 0 })).toBe(
       person
     );
+    expect(person.setKeysPath(['address'], { ...person.get().address, zip: 0 })).toBe(
+      person
+    );
 
-    // When we disable deepEqual on set/setPath, should no longer be equal.
+    // When we disable deepEqual on set/setPath/setKeysPath, should no longer be equal.
     expect(
       person.set(
         { address: { ...person.get().address, zip: 0 } },
@@ -133,6 +194,13 @@ describe('Entity tests', () => {
         false // disable deepEqual
       )
     ).not.toBe(person);
+    expect(
+      person.setKeysPath(
+        ['address'],
+        { ...person.get().address, zip: 0 },
+        false // disable deepEqual
+      )
+    ).not.toBe(person);
 
     // When there actually is an update, a new instance should be returned.
     expect(
@@ -141,8 +209,11 @@ describe('Entity tests', () => {
     expect(
       person.setPath('address', { ...person.get().address, zip: 40 })
     ).not.toBe(person);
+    expect(
+      person.setKeysPath(['address'], { ...person.get().address, zip: 40 })
+    ).not.toBe(person);
 
-    // With `deepEqual` parameter directly on set/setPath.
+    // With `deepEqual` parameter directly on set/setPath/setKeysPath.
     // Should be equal, since no change according to deepEqual.
     expect(
       entity(person.get())
@@ -161,9 +232,18 @@ describe('Entity tests', () => {
         )
         .get()
     ).toBe(person.get());
+    expect(
+      entity(person.get())
+        .setKeysPath(
+          ['address'],
+          { ...person.get().address },
+          true // enable deepEqual
+        )
+        .get()
+    ).toBe(person.get());
   });
 
-  it('set/setPath when base entity is an array', () => {
+  it('set/setPath/setKeysPath when base entity is an array', () => {
     const test = entity([
       { strValue: 'Hello!', numValue: 100, array: [1, 2, 3] },
     ]);
@@ -173,8 +253,16 @@ describe('Entity tests', () => {
       test.setPath('[0].strValue', 'Testing').get()[0].strValue
     ).toStrictEqual('Testing');
 
+    expect(
+      test.setKeysPath([0, 'strValue'], 'Testing').get()[0].strValue
+    ).toStrictEqual('Testing');
+
     // Update value inside first element
     expect(test.setPath('[0].array[3]', 600).get()[0].array).toStrictEqual([
+      1, 2, 3, 600,
+    ]);
+
+    expect(test.setKeysPath([0, 'array', 3], 600).get()[0].array).toStrictEqual([
       1, 2, 3, 600,
     ]);
 
@@ -183,10 +271,23 @@ describe('Entity tests', () => {
       test.setPath('[0]', { ...test.get()[0], numValue: 777, array: [0] }).get()
     ).toStrictEqual([{ ...test.get()[0], numValue: 777, array: [0] }]);
 
+    expect(
+      test.setKeysPath([0], { ...test.get()[0], numValue: 777, array: [0] }).get()
+    ).toStrictEqual([{ ...test.get()[0], numValue: 777, array: [0] }]);
+
     // Add new element
     expect(
       test
         .setPath('[1]', { strValue: 'New element', numValue: 777, array: [0] })
+        .get()
+    ).toStrictEqual([
+      test.get()[0],
+      { strValue: 'New element', numValue: 777, array: [0] },
+    ]);
+
+    expect(
+      test
+        .setKeysPath([1], { strValue: 'New element', numValue: 777, array: [0] })
         .get()
     ).toStrictEqual([
       test.get()[0],
