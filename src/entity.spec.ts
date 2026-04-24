@@ -6,7 +6,7 @@ describe('Entity tests', () => {
     const something = () => ({ a: 1, b: 2 });
     const test = something();
 
-    entity(something).set({ b: 22 });
+    entity(test).set({ b: 22 });
 
     // Make sure original input-object is untouched, because of
     // immutability.
