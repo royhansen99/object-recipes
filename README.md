@@ -119,6 +119,11 @@ arrayEntity.setPath('[0].value', 'Hello sir!');
 // set() will simply reset the entire entity to the new value, for arrays.
 arrayEntity.set([{ value: 'Something' }]);
 
+// There is also a setKeysPath() method that accept an array of keys instead
+// of a string, and works the same way as setPath().
+person.setKeysPath(['address', 'street'], 'Teststreet 1').get();
+person.setKeysPath(['activities', 0], 'Downhill skiing').get();
+
 // Defining a recipe.
 const addressRecipe = (
   street: string, zip: number, country: string
