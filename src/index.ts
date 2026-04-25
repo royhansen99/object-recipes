@@ -1,7 +1,5 @@
 import { Path, PathValue, StringPath, StringPathValue } from './types';
-import { deepClone, deepEqual as deepEqualFn, pathSet, pathKeysSet } from './utils';
-
-type Entity = { [key: string | number]: unknown } | unknown[];
+import { deepClone, deepEqual as deepEqualFn, pathSetWeakTypes, pathKeysSetWeakTypes, Entity } from './utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Recipe<T extends EntityClass<any>> = (entity: T) => T;
@@ -78,7 +76,7 @@ export class EntityClass<const T extends Entity> {
     deepEqual?: boolean | EqualityFn
   ) {
     const _equalityFn = this.getEqualityFn(deepEqual);
-    const trySet = pathSet(this.entity, path, value);
+    const trySet = pathSetWeakTypes(this.entity, path, value);
 
     // If change is identical to current value we simply
     // return the current instance, else we spread into a new
@@ -93,12 +91,7 @@ export class EntityClass<const T extends Entity> {
   ) {
     const _equalityFn = this.getEqualityFn(deepEqual);
 
-    // This line leads to "excessive depth limit error", and there really
-    // does not seem to be a way around it.
-    // But we already type checked the argument to the parent function, so
-    // it's fine to ignore.
-    // @ts-expect-error "Excessive depth limit expected"
-    const trySet = pathKeysSet<T, P>(this.entity, path, value);
+    const trySet = pathKeysSetWeakTypes(this.entity, path, value);
 
     // If change is identical to current value we simply
     // return the current instance, else we spread into a new

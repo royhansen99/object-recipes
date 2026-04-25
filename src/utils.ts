@@ -104,15 +104,15 @@ const pathWalker = <T>(
   return false;
 };
 
-type TObj = { [key: string | number]: unknown } | unknown[];
+export type Entity = { [key: string | number]: unknown } | unknown[];
 
 // Update STRING-path on an object with a new value.
 // The update is immutable and will return a spread
 // of the affected paths.
-export const pathSet = <const T extends TObj, const P extends StringPath<T>>(
+export const pathSetWeakTypes = <const T extends Entity>(
   object: T,
-  path: P,
-  value: StringPathValue<T, P>
+  path: string,
+  value: unknown 
 ): T => {
   const list = (path as string)
     .replace(/\[([^\[\]]*)\]/g, '.$1')
@@ -138,13 +138,27 @@ export const pathSet = <const T extends TObj, const P extends StringPath<T>>(
   return newObject;
 };
 
+// A proxy function-signature used for tests.
+// For tests, we dont want to use the parent function directly
+// because it has weak types.
+export const pathSet = <const T extends Entity, const P extends StringPath<T>>(
+  object: T,
+  path: P,
+  value: StringPathValue<T, P>
+): T => {
+  return pathSetWeakTypes(object, path, value);
+};
+
 // Update ARRAY-path on an object with a new value.
 // The update is immutable and will return a spread
 // of the affected paths.
-export const pathKeysSet = <const T extends TObj, const P extends Path<T>>(
+//
+// This implementation deliberately has weak types to prevent
+// excessive recursion errors when called from entity->setKeysPath()
+export const pathKeysSetWeakTypes = <const T extends Entity>(
   object: T,
-  path: P,
-  value: PathValue<T, P>
+  path: (number | string)[],
+  value: unknown 
 ): T => {
   if(!path.length) return value as T;
 
@@ -163,4 +177,15 @@ export const pathKeysSet = <const T extends TObj, const P extends Path<T>>(
   pathWalker(newObject, path as string[], value);
 
   return newObject;
+};
+
+// A proxy function-signature used for tests.
+// For tests, we dont want to use the parent function directly
+// because it has weak types.
+export const pathKeysSet = <const T extends Entity, const P extends Path<T>>(
+  object: T,
+  path: P,
+  value: PathValue<T, P>
+): T => {
+  return pathKeysSetWeakTypes(object, path, value);
 };

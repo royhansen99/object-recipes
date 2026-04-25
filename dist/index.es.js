@@ -19,19 +19,19 @@ function o(r, t) {
 const l = (r, t, e, i = !1) => {
   let n = r;
   for (let s = 0; s < t.length; s++) {
-    const u = t[s];
+    const y = t[s];
     if (n === null || typeof n != "object")
       throw new Error(
         "One or more path levels are not valid. The entire nested structure you specified must be spreadable down to (but not including) the last item."
       );
-    const a = n[u];
+    const a = n[y];
     if (s === t.length - 1)
       if (i) {
         if (Object.is(a, e))
           return !0;
-      } else return n[u] = e, !0;
-    else !i && a !== null && typeof a == "object" && (n[u] = Array.isArray(n[u]) ? [...n[u]] : { ...n[u] });
-    n = n[u];
+      } else return n[y] = e, !0;
+    else !i && a !== null && typeof a == "object" && (n[y] = Array.isArray(n[y]) ? [...n[y]] : { ...n[y] });
+    n = n[y];
   }
   return !1;
 }, c = (r, t, e) => {
@@ -46,7 +46,7 @@ const l = (r, t, e, i = !1) => {
   const i = Array.isArray(r) ? [...r] : { ...r };
   return l(i, t, e), i;
 };
-class y {
+class u {
   constructor(t, e) {
     this.equalityFn = Object.is, this.entity = t, e != null && e.deepEqual && (this.equalityFn = e.deepEqual === !0 ? o : e.deepEqual);
   }
@@ -55,17 +55,17 @@ class y {
   }
   set(t, e) {
     const i = this.getEqualityFn(e);
-    return Array.isArray(this.entity) ? i(this.entity, t) ? this : new y(t) : Object.keys(t).filter(
+    return Array.isArray(this.entity) ? i(this.entity, t) ? this : new u(t) : Object.keys(t).filter(
       (s) => !i(t[s], this.entity[s])
-    ).length !== 0 ? Array.isArray(this.entity) ? new y(t) : new y({ ...this.entity, ...t }) : this;
+    ).length !== 0 ? Array.isArray(this.entity) ? new u(t) : new u({ ...this.entity, ...t }) : this;
   }
   setPath(t, e, i) {
     const n = this.getEqualityFn(i), s = c(this.entity, t, e);
-    return n(s, this.entity) ? this : new y(s);
+    return n(s, this.entity) ? this : new u(s);
   }
   setKeysPath(t, e, i) {
     const n = this.getEqualityFn(i), s = f(this.entity, t, e);
-    return n(s, this.entity) ? this : new y(s);
+    return n(s, this.entity) ? this : new u(s);
   }
   recipe(t) {
     return t(this);
@@ -78,11 +78,11 @@ class y {
   }
 }
 function p(r, t) {
-  return new y(r, t);
+  return new u(r, t);
 }
 const A = (...r) => (t) => r.reduce((e, i) => e.recipe(i), p(t)).get();
 export {
-  y as EntityClass,
+  u as EntityClass,
   p as entity,
   A as recipe
 };
