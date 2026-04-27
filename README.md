@@ -144,6 +144,38 @@ const recipeUpdate = person.recipe(
 //   activities: string[],
 // }
 type RealObject = Shape<typeof person>;
+
+// Deeply nested objects can slow down type-checking performance, therefore you have the option
+// to pass in a union of types you want to ignore, if you feel the type-checker is slow.
+// An example of types you may want to ignore is luxon/DateTime, to avoid recursively iterating
+// through the entire object when inferring the structure of your state.
+entity({ 
+```
+
+### Type-checking performance
+```typescript
+import { entity, Recipe, Shape } from 'object-recipes'
+import { DateTime } from 'luxon';
+
+// Deeply nested objects can slow down type-checking performance, therefore you have the option
+// to pass in a union of types you want to ignore, if you feel the type-checker is slow.
+// An example of types you may want to ignore is luxon/DateTime, to avoid recursively iterating
+// through the entire object when inferring the structure of your state.
+
+const _item = {
+  createdAt: DateTime,
+  updatedAt: DateTime,
+  name: string
+};
+
+// Pass DateTime as the 2nd template argument, to prevent it from being visited when recursing.
+const item = entity<typeof item, DateTime>(item); 
+
+
+// You can set the root part of `DateTime`, however you can't set individual properties inside
+// it. Performance is now much better as the type-checker is prevented from accessing properties
+// inside the object.
+item.setPath('createdAt', DateTime.now()); 
 ```
 
 ### Advanced usage

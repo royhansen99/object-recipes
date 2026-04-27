@@ -21,58 +21,60 @@ type UnaccessibleObjectType =
   // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
   | Symbol;
 
-export type Path<T, P extends any[] = []> =
+export type Path<T, U = never, P extends any[] = []> =
   T extends readonly any[]
-    ? (P | Path<T[number], [...P, number]>)
+    ? (P | Path<T[number], U, [...P, number]>)
     : T extends object
       ? P | {
           [K in keyof T]: K extends string | number ? 
-            (T[K] extends UnaccessibleObjectType
+            (T[K] extends (UnaccessibleObjectType | U) 
               ? [...P, K]
-              : Path<T[K], [...P, K]>)
+              : Path<T[K], U, [...P, K]>)
             : never
         }[keyof T]
       : P;
 
-export type StringPath<T, P extends string = ''> =
-  T extends UnaccessibleObjectType
+export type StringPath<T, U = never, P extends string = ''> =
+  T extends (UnaccessibleObjectType | U) 
     ? never
     : T extends Array<infer V>
       ? (P extends '' ? '' : never) | 
-        `${P}[${number}]` | StringPath<V, `${P}[${number}]`>
+        `${P}[${number}]` | StringPath<V, U, `${P}[${number}]`>
       : keyof T extends infer K
         ? K extends keyof T & (string | number)
           ? P extends ''
-            ? '' | `${K}` | StringPath<T[K], `${K}`>
-            : `${P}.${K}` | StringPath<T[K], `${P}.${K}`>
+            ? '' | `${K}` | StringPath<T[K], U, `${K}`>
+            : `${P}.${K}` | StringPath<T[K], U, `${P}.${K}`>
           : never
         : never;
 
-export type PathValue<T, P extends readonly any[]> =
+export type PathValue<T, U = never, P extends readonly any[] = any[]> =
   P extends readonly [infer K, ...infer Rest]
-    ? K extends keyof T
-      ? PathValue<T[K], Rest>
-      : T extends readonly any[]
-        ? K extends number
-          ? PathValue<T[number], Rest>
+    ? T extends (UnaccessibleObjectType | U)
+      ? never
+      : K extends keyof T
+        ? PathValue<T[K], U, Rest>
+        : T extends readonly any[]
+          ? K extends number
+            ? PathValue<T[number], U, Rest>
+            : never
           : never
-        : never
     : T;
 
-export type StringPathValue<T, P extends string = ''> =
+export type StringPathValue<T, U = never, P extends string = ''> =
   P extends ''
     ? T 
-    : T extends UnaccessibleObjectType
+    : T extends (UnaccessibleObjectType | U) 
       ? never
       : P extends keyof T
         ? T[P]
         : P extends `[${number}][${infer R}`
           ? T extends any[]
-            ? StringPathValue<T[number], `[${R}`>
+            ? StringPathValue<T[number], U, `[${R}`>
             : never
           : P extends `[${number}].${infer R}`
             ? T extends any[]
-              ? StringPathValue<T[number], `${R}`>
+              ? StringPathValue<T[number], U, `${R}`>
               : never
             : P extends `[${number}]`
               ? T extends any[]
@@ -80,10 +82,10 @@ export type StringPathValue<T, P extends string = ''> =
                 : never
               : P extends `${infer K}[${infer R}`
                 ? K extends keyof T
-                  ? StringPathValue<T[K], `[${R}`>
+                  ? StringPathValue<T[K], U, `[${R}`>
                   : never
                 : P extends `${infer K}.${infer R}`
                   ? K extends keyof T
-                    ? StringPathValue<T[K], R>
+                    ? StringPathValue<T[K], U, R>
                     : never
                   : never

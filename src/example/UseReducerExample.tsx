@@ -35,7 +35,8 @@ type Actions = typeof nameAgeRecipe | typeof addressRecipe;
 
 export default function UseReducerExample() {
   const [{ name, age, address }, dispatch] = useReducer(
-    (person, action: ReturnType<Actions>) => recipe(action)(person),
+    (person, action: ReturnType<Actions>) =>
+      recipe(action)(person),
     personEntity.get()
   );
 

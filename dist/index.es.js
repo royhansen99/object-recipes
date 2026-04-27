@@ -80,7 +80,10 @@ class u {
 function p(r, t) {
   return new u(r, t);
 }
-const A = (...r) => (t) => r.reduce((e, i) => e.recipe(i), p(t)).get();
+const A = (...r) => (t) => r.reduce(
+  (e, i) => e.recipe(i),
+  p(t)
+).get();
 export {
   u as EntityClass,
   p as entity,

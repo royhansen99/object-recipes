@@ -141,10 +141,14 @@ export const pathSetWeakTypes = <const T extends Entity>(
 // A proxy function-signature used for tests.
 // For tests, we dont want to use the parent function directly
 // because it has weak types.
-export const pathSet = <const T extends Entity, const P extends StringPath<T>>(
+export const pathSet =
+  <const T extends Entity,
+   const P extends StringPath<T, U>,
+   U = never>
+(
   object: T,
   path: P,
-  value: StringPathValue<T, P>
+  value: StringPathValue<T, U, P>
 ): T => {
   return pathSetWeakTypes(object, path, value);
 };
@@ -182,10 +186,14 @@ export const pathKeysSetWeakTypes = <const T extends Entity>(
 // A proxy function-signature used for tests.
 // For tests, we dont want to use the parent function directly
 // because it has weak types.
-export const pathKeysSet = <const T extends Entity, const P extends Path<T>>(
+export const pathKeysSet =
+  <const T extends Entity,
+   const P extends Path<T, U>,
+   U = never>
+(
   object: T,
   path: P,
-  value: PathValue<T, P>
+  value: PathValue<T, U, P>
 ): T => {
   return pathKeysSetWeakTypes(object, path, value);
 };
