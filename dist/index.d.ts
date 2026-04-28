@@ -29,7 +29,9 @@ declare type PathValue<T, U = never, P extends readonly any[] = any[]> = P exten
 
 export declare type Recipe<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = (entity: T) => T;
 
-export declare const recipe: <const E extends Entity, U = never>(...recipes: Recipe<EntityClass<E, U>>[]) => (value: E) => E;
+export declare function recipe<const E extends Entity, U = never>(entity: E, ...recipes: Recipe<EntityClass<E, U>>[]): E;
+
+export declare function recipe<const E extends Entity, U = never>(...recipes: Recipe<EntityClass<E, U>>[]): (entity: E) => E;
 
 export declare type Shape<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = ReturnType<T['get']>;
 

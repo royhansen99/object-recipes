@@ -42,7 +42,7 @@ const setAddressAction = (
 
 const reducer = (entity = personEntity.get(), action?: Action) =>
   action?.recipe && action.type.startsWith('person.')
-    ? recipe(action.recipe)(entity)
+    ? recipe(entity, action.recipe)
     : entity;
 
 declare const window: {

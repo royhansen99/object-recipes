@@ -119,12 +119,26 @@ export function entity<T extends Entity, U = never>(
 
 // Convenience wrapper/helper when you want to run recipes through
 // an external state-library setter.
-export const recipe = <const E extends Entity, U = never>
-  (...recipes: Recipe<EntityClass<E, U>>[]) =>
-  (value: E): E =>
-    recipes
-      .reduce(
-        (_entity, recipe) =>
-          _entity.recipe(recipe),
-        entity<E, U>(value))
-      .get();
+//
+// Usage:
+// recipe(entity, recipe1, recipe2, ...);
+// OR
+// recipe(recipe1, recipe2, ...)(entity);
+export function recipe<const E extends Entity, U = never>
+  (entity: E, ...recipes: Recipe<EntityClass<E, U>>[]): E;
+export function recipe<const E extends Entity, U = never>
+  (...recipes: Recipe<EntityClass<E, U>>[]): (entity: E) => E;
+export function recipe<const E extends Entity, U = never>
+  (...recipes: Recipe<EntityClass<E, U>>[]) {
+
+  const transform = (value: E, _recipes: typeof recipes): E =>
+    _recipes.reduce(
+      (_entity, rec) =>
+        _entity.recipe(rec),
+        entity<E, U>(value)
+    ).get() 
+
+  return recipes[0] instanceof Function
+    ? (entity: E) => transform(entity, recipes)
+    : transform(recipes[0], recipes.slice(1));
+  }

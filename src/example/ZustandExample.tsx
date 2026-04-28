@@ -35,7 +35,7 @@ const usePersonStore = create<UsePersonStore>((set) => ({
   dispatch: (_recipe) =>
     set((s) => ({
       ...s,
-      entity: recipe(_recipe)(s.entity),
+      entity: recipe(s.entity, _recipe),
     })),
 }));
 
