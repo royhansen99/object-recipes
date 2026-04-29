@@ -89,3 +89,12 @@ export type StringPathValue<T, U = never, P extends string = ''> =
                     ? StringPathValue<T[K], U, R>
                     : never
                   : never
+
+export type DeepReadonly<T, U = never> =
+  T extends (UnaccessibleObjectType | U)
+  ? T
+  : T extends (infer U)[]
+    ? ReadonlyArray<DeepReadonly<U>>
+      : T extends object
+        ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
+        : T;

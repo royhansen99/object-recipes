@@ -1,3 +1,7 @@
+declare type DeepReadonly<T, U = never> = T extends (UnaccessibleObjectType | U) ? T : T extends (infer U)[] ? ReadonlyArray<DeepReadonly<U>> : T extends object ? {
+    readonly [K in keyof T]: DeepReadonly<T[K]>;
+} : T;
+
 declare type Entity = {
     [key: string | number]: unknown;
 } | unknown[];
@@ -15,8 +19,8 @@ export declare class EntityClass<const T extends Entity, U = never> {
     setPath<const P extends StringPath<T, U>>(path: P, value: StringPathValue<T, U, P>, deepEqual?: boolean | EqualityFn): EntityClass<T, U>;
     setKeysPath<const P extends Path<T, U>>(path: P, value: PathValue<T, U, P>, deepEqual?: boolean | EqualityFn): EntityClass<T, U>;
     recipe(recipeCallback: Recipe<EntityClass<T, U>, T, U>): EntityClass<T, U>;
-    get(): Readonly<T>;
-    getClone(): Writable<T>;
+    get(): DeepReadonly<T, U>;
+    getClone(): T;
 }
 
 declare type EqualityFn = (a: any, b: any) => boolean;
@@ -29,9 +33,9 @@ declare type PathValue<T, U = never, P extends readonly any[] = any[]> = P exten
 
 export declare type Recipe<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = (entity: T) => T;
 
-export declare function recipe<const E extends Entity, U = never>(entity: E, ...recipes: Recipe<EntityClass<E, U>>[]): E;
+export declare function recipe<const E extends Entity, U = never>(entity: E, ...recipes: Recipe<EntityClass<E, U>>[]): DeepReadonly<E, U>;
 
-export declare function recipe<const E extends Entity, U = never>(...recipes: Recipe<EntityClass<E, U>>[]): (entity: E) => E;
+export declare function recipe<const E extends Entity, U = never>(...recipes: Recipe<EntityClass<E, U>>[]): (entity: E) => DeepReadonly<E, U>;
 
 export declare type Shape<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = ReturnType<T['get']>;
 
@@ -40,9 +44,5 @@ declare type StringPath<T, U = never, P extends string = ''> = T extends (Unacce
 declare type StringPathValue<T, U = never, P extends string = ''> = P extends '' ? T : T extends (UnaccessibleObjectType | U) ? never : P extends keyof T ? T[P] : P extends `[${number}][${infer R}` ? T extends any[] ? StringPathValue<T[number], U, `[${R}`> : never : P extends `[${number}].${infer R}` ? T extends any[] ? StringPathValue<T[number], U, `${R}`> : never : P extends `[${number}]` ? T extends any[] ? T[number] : never : P extends `${infer K}[${infer R}` ? K extends keyof T ? StringPathValue<T[K], U, `[${R}`> : never : P extends `${infer K}.${infer R}` ? K extends keyof T ? StringPathValue<T[K], U, R> : never : never;
 
 declare type UnaccessibleObjectType = string | number | boolean | symbol | null | undefined | Function | Map<any, any> | WeakMap<any, any> | Set<any> | WeakSet<any> | Date | RegExp | Error | ArrayBuffer | Promise<any> | Symbol;
-
-declare type Writable<T> = {
-    -readonly [K in keyof T]: T[K];
-};
 
 export { }

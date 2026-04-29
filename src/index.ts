@@ -1,12 +1,9 @@
-import { Path, PathValue, StringPath, StringPathValue } from './types';
+import { Path, PathValue, StringPath, StringPathValue, DeepReadonly } from './types';
 import { deepClone, deepEqual as deepEqualFn, pathSetWeakTypes, pathKeysSetWeakTypes, Entity } from './utils';
 
 export type Recipe<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = (entity: T) => T;
 
 export type Shape<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = ReturnType<T['get']>;
-
-// Convert a Readonly<T> type to writable.
-type Writable<T> = { -readonly [K in keyof T]: T[K] };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EqualityFn = (a: any, b: any) => boolean;
@@ -102,11 +99,11 @@ export class EntityClass<const T extends Entity, U = never> {
   }
 
   get() {
-    return this.entity;
+    return this.entity as DeepReadonly<T, U>;
   }
 
   getClone() {
-    return deepClone(this.entity) as Writable<T>;
+    return deepClone(this.entity) as T;
   }
 }
 
@@ -125,18 +122,18 @@ export function entity<T extends Entity, U = never>(
 // OR
 // recipe(recipe1, recipe2, ...)(entity);
 export function recipe<const E extends Entity, U = never>
-  (entity: E, ...recipes: Recipe<EntityClass<E, U>>[]): E;
+  (entity: E, ...recipes: Recipe<EntityClass<E, U>>[]): DeepReadonly<E, U>;
 export function recipe<const E extends Entity, U = never>
-  (...recipes: Recipe<EntityClass<E, U>>[]): (entity: E) => E;
+  (...recipes: Recipe<EntityClass<E, U>>[]): (entity: E) => DeepReadonly<E, U>;
 export function recipe<const E extends Entity, U = never>
   (...recipes: Recipe<EntityClass<E, U>>[]) {
 
-  const transform = (value: E, _recipes: typeof recipes): E =>
+  const transform = (value: E, _recipes: typeof recipes): DeepReadonly<E, U> =>
     _recipes.reduce(
       (_entity, rec) =>
         _entity.recipe(rec),
         entity<E, U>(value)
-    ).get() 
+    ).get();
 
   return recipes[0] instanceof Function
     ? (entity: E) => transform(entity, recipes)
