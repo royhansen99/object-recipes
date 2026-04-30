@@ -20,6 +20,7 @@ export declare class EntityClass<const T extends Entity, U = never> {
     setKeysPath<const P extends Path<T, U>>(path: P, value: PathValue<T, U, P>, deepEqual?: boolean | EqualityFn): EntityClass<T, U>;
     recipe(recipeCallback: Recipe<EntityClass<T, U>, T, U>): EntityClass<T, U>;
     get(): DeepReadonly<T, U>;
+    getUnsafe(): T;
     getClone(): T;
 }
 
@@ -38,6 +39,8 @@ export declare function recipe<const E extends Entity, U = never>(entity: E, ...
 export declare function recipe<const E extends Entity, U = never>(...recipes: Recipe<EntityClass<E, U>>[]): (entity: E) => DeepReadonly<E, U>;
 
 export declare type Shape<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = ReturnType<T['get']>;
+
+export declare type ShapeUnsafe<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = ReturnType<T['getUnsafe']>;
 
 declare type StringPath<T, U = never, P extends string = ''> = T extends (UnaccessibleObjectType | U) ? never : T extends Array<infer V> ? (P extends '' ? '' : never) | `${P}[${number}]` | StringPath<V, U, `${P}[${number}]`> : keyof T extends infer K ? K extends keyof T & (string | number) ? P extends '' ? '' | `${K}` | StringPath<T[K], U, `${K}`> : `${P}.${K}` | StringPath<T[K], U, `${P}.${K}`> : never : never;
 

@@ -73,6 +73,17 @@ class y {
   get() {
     return this.entity;
   }
+  // Only use this if you know what you're doing!
+  // Return base entity-object without read-only protection, allowing
+  // you to break immutability.
+  //
+  // Convenient if you're passing the object into other libraries
+  // that may want to mutably change the object, and you dont want
+  // the overhead of getClone(), and you dont care about breaking
+  // immutability.
+  getUnsafe() {
+    return this.entity;
+  }
   getClone() {
     return h(this.entity);
   }

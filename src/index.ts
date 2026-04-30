@@ -5,6 +5,8 @@ export type Recipe<T extends EntityClass<E, U>, E extends Entity = Entity, U = n
 
 export type Shape<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = ReturnType<T['get']>;
 
+export type ShapeUnsafe<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = ReturnType<T['getUnsafe']>;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EqualityFn = (a: any, b: any) => boolean;
 
@@ -100,6 +102,18 @@ export class EntityClass<const T extends Entity, U = never> {
 
   get() {
     return this.entity as DeepReadonly<T, U>;
+  }
+
+  // Only use this if you know what you're doing!
+  // Return base entity-object without read-only protection, allowing
+  // you to break immutability.
+  //
+  // Convenient if you're passing the object into other libraries
+  // that may want to mutably change the object, and you dont want
+  // the overhead of getClone(), and you dont care about breaking
+  // immutability.
+  getUnsafe() {
+    return this.entity as T;
   }
 
   getClone() {

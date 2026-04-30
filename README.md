@@ -72,6 +72,12 @@ person.get();
 // to the entity, since it is a deep-copy.
 person.getClone();
 
+// For performance, if you dont care about breaking
+// immutability, and you dont want the overhead of deep-cloning
+// with getClone(), you can use this method to get a mutable
+// variant of the plain js-object.
+person.getUnsafe();
+
 // Update one or more fields on the entity.
 // set() returns a new entity-instance with updated fields,
 // without touching the original instance.
@@ -145,11 +151,8 @@ const recipeUpdate = person.recipe(
 // }
 type RealObject = Shape<typeof person>;
 
-// Deeply nested objects can slow down type-checking performance, therefore you have the option
-// to pass in a union of types you want to ignore, if you feel the type-checker is slow.
-// An example of types you may want to ignore is luxon/DateTime, to avoid recursively iterating
-// through the entire object when inferring the structure of your state.
-entity({ 
+// If you want the unsafe mutable version that you can get from getUnsafe():
+type RealUnsafeObject = ShapeUnsafe<typeof person>;
 ```
 
 ### Type-checking performance
