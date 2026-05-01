@@ -19,8 +19,8 @@ export declare class EntityClass<const T extends Entity, U = never> {
     setPath<const P extends StringPath<T, U>>(path: P, value: StringPathValue<T, U, P>, deepEqual?: boolean | EqualityFn): EntityClass<T, U>;
     setKeysPath<const P extends Path<T, U>>(path: P, value: PathValue<T, U, P>, deepEqual?: boolean | EqualityFn): EntityClass<T, U>;
     recipe(recipeCallback: Recipe<EntityClass<T, U>, T, U>): EntityClass<T, U>;
-    get(): DeepReadonly<T, U>;
-    getUnsafe(): T;
+    get(): T;
+    getSafe(): DeepReadonly<T, U>;
     getClone(): T;
 }
 
@@ -34,13 +34,17 @@ declare type PathValue<T, U = never, P extends readonly any[] = any[]> = P exten
 
 export declare type Recipe<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = (entity: T) => T;
 
-export declare function recipe<const E extends Entity, U = never>(entity: E, ...recipes: Recipe<EntityClass<E, U>>[]): DeepReadonly<E, U>;
+export declare function recipe<const T extends Recipe<EntityClass<E, U>, E, U>, const E extends Entity, U = never>(entity: E, ...recipes: T[]): E;
 
-export declare function recipe<const E extends Entity, U = never>(...recipes: Recipe<EntityClass<E, U>>[]): (entity: E) => DeepReadonly<E, U>;
+export declare function recipe<const T extends Recipe<EntityClass<E, U>, E, U>, const E extends Entity, U = never>(...recipes: T[]): (entity: E) => E;
+
+export declare function recipeSafe<const T extends Recipe<EntityClass<E, U>, E, U>, const E extends Entity, U = never>(entity: E, ...recipes: T[]): DeepReadonly<E>;
+
+export declare function recipeSafe<const T extends Recipe<EntityClass<E, U>, E, U>, const E extends Entity, U = never>(...recipes: T[]): (entity: E) => DeepReadonly<E>;
 
 export declare type Shape<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = ReturnType<T['get']>;
 
-export declare type ShapeUnsafe<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = ReturnType<T['getUnsafe']>;
+export declare type ShapeSafe<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = ReturnType<T['getSafe']>;
 
 declare type StringPath<T, U = never, P extends string = ''> = T extends (UnaccessibleObjectType | U) ? never : T extends Array<infer V> ? (P extends '' ? '' : never) | `${P}[${number}]` | StringPath<V, U, `${P}[${number}]`> : keyof T extends infer K ? K extends keyof T & (string | number) ? P extends '' ? '' | `${K}` | StringPath<T[K], U, `${K}`> : `${P}.${K}` | StringPath<T[K], U, `${P}.${K}`> : never : never;
 

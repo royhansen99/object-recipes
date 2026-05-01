@@ -1,6 +1,6 @@
 import React from 'react';
 import { create } from 'zustand';
-import { entity, Recipe, Shape, recipe } from '../index';
+import { entity, Recipe, ShapeSafe, recipeSafe } from '../index';
 
 const personEntity = entity({
   name: 'John Doe',
@@ -26,16 +26,16 @@ const addressRecipe =
     });
 
 type UsePersonStore = {
-  entity: Shape<typeof personEntity>;
+  entity: ShapeSafe<typeof personEntity>;
   dispatch: (recipe: Recipe<typeof personEntity>) => void;
 };
 
 const usePersonStore = create<UsePersonStore>((set) => ({
-  entity: personEntity.get(),
+  entity: personEntity.getSafe(),
   dispatch: (_recipe) =>
     set((s) => ({
       ...s,
-      entity: recipe(s.entity, _recipe),
+      entity: recipeSafe(s.entity, _recipe),
     })),
 }));
 

@@ -6,7 +6,7 @@ This example was created on Angular v20.3.0, and NgRx v20.0.1.
 /* src/state/person.ts  */
 
 import { createReducer, createAction, on, props } from '@ngrx/store';
-import { entity, recipe as recipeHelper, Recipe, Shape } from 'object-recipes';
+import { entity, recipeSafe, Recipe, Shape, ShapeSafe } from 'object-recipes';
 
 export const personEntity = entity({
   name: 'John Doe',
@@ -18,7 +18,7 @@ export const personEntity = entity({
   },
 });
 
-export type Person = Shape<typeof personEntity>;
+export type Person = ShapeSafe<typeof personEntity>;
 
 export const setNameAgeAction =
   (
@@ -41,8 +41,8 @@ export const action = createAction(
   props<{ recipe: Recipe<typeof personEntity> }>()
 );
 export const personStoreReducer = createReducer(
-  personEntity.get(),
-  on(action, (state, { recipe }) => recipeHelper(recipe)(state))
+  personEntity.getSafe(),
+  on(action, (state, { recipe }) => recipeSafe(recipe)(state))
 );
 ```
 

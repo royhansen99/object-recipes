@@ -1,8 +1,8 @@
-function h(e) {
+function f(e) {
   if (e === null || typeof e != "object") return e;
   const t = Array.isArray(e) ? [] : {};
   for (const r in e)
-    Object.prototype.hasOwnProperty.call(e, r) && (t[r] = h(e[r]));
+    Object.prototype.hasOwnProperty.call(e, r) && (t[r] = f(e[r]));
   return t;
 }
 function o(e, t) {
@@ -34,7 +34,7 @@ const l = (e, t, r, i = !1) => {
     n = n[u];
   }
   return !1;
-}, f = (e, t, r) => {
+}, h = (e, t, r) => {
   const i = t.replace(/\[([^\[\]]*)\]/g, ".$1").replace(/^\./, "").split(".");
   if (!t.length) return r;
   if (l(e, i, r, !0)) return e;
@@ -60,7 +60,7 @@ class y {
     ).length !== 0 ? Array.isArray(this.entity) ? new y(t) : new y({ ...this.entity, ...t }) : this;
   }
   setPath(t, r, i) {
-    const n = this.getEqualityFn(i), s = f(this.entity, t, r);
+    const n = this.getEqualityFn(i), s = h(this.entity, t, r);
     return n(s, this.entity) ? this : new y(s);
   }
   setKeysPath(t, r, i) {
@@ -81,11 +81,11 @@ class y {
   // that may want to mutably change the object, and you dont want
   // the overhead of getClone(), and you dont care about breaking
   // immutability.
-  getUnsafe() {
+  getSafe() {
     return this.entity;
   }
   getClone() {
-    return h(this.entity);
+    return f(this.entity);
   }
 }
 function p(e, t) {
@@ -98,8 +98,12 @@ function A(...e) {
   ).get();
   return e[0] instanceof Function ? (r) => t(r, e) : t(e[0], e.slice(1));
 }
+function O(...e) {
+  return A(e);
+}
 export {
   y as EntityClass,
   p as entity,
-  A as recipe
+  A as recipe,
+  O as recipeSafe
 };

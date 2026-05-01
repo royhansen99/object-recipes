@@ -6,7 +6,7 @@ import {
   useDispatch,
   TypedUseSelectorHook,
 } from 'react-redux';
-import { entity, recipe, Recipe, Shape } from '../index';
+import { entity, recipeSafe, Recipe, Shape, ShapeSafe } from '../index';
 
 const personEntity = entity({
   name: 'John Doe',
@@ -40,16 +40,16 @@ const setAddressAction = (
     }),
 });
 
-const reducer = (entity = personEntity.get(), action?: Action) =>
+const reducer = (entity = personEntity.getSafe(), action?: Action) =>
   action?.recipe && action.type.startsWith('person.')
-    ? recipe(entity, action.recipe)
+    ? recipeSafe(entity, action.recipe)
     : entity;
 
 declare const window: {
   __REDUX_DEVTOOLS_EXTENSION__?: () => StoreEnhancer;
 };
 
-const store = createStore<Shape<typeof personEntity>, Action>(
+const store = createStore<ShapeSafe<typeof personEntity>, Action>(
   reducer,
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 );

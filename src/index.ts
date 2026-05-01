@@ -5,7 +5,7 @@ export type Recipe<T extends EntityClass<E, U>, E extends Entity = Entity, U = n
 
 export type Shape<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = ReturnType<T['get']>;
 
-export type ShapeUnsafe<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = ReturnType<T['getUnsafe']>;
+export type ShapeSafe<T extends EntityClass<E, U>, E extends Entity = Entity, U = never> = ReturnType<T['getSafe']>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EqualityFn = (a: any, b: any) => boolean;
@@ -16,7 +16,7 @@ export class EntityClass<const T extends Entity, U = never> {
   // complete type-safety below the root of the object. But
   // that's OK, we dont want the overhead of infering all nested
   // paths anyway.
-  private entity: Readonly<T>;
+  private entity: T;
 
   private equalityFn: EqualityFn = Object.is;
 
@@ -101,7 +101,7 @@ export class EntityClass<const T extends Entity, U = never> {
   }
 
   get() {
-    return this.entity as DeepReadonly<T, U>;
+    return this.entity;
   }
 
   // Only use this if you know what you're doing!
@@ -112,8 +112,8 @@ export class EntityClass<const T extends Entity, U = never> {
   // that may want to mutably change the object, and you dont want
   // the overhead of getClone(), and you dont care about breaking
   // immutability.
-  getUnsafe() {
-    return this.entity as T;
+  getSafe() {
+    return this.entity as DeepReadonly<T, U>;
   }
 
   getClone() {
@@ -135,14 +135,14 @@ export function entity<T extends Entity, U = never>(
 // recipe(entity, recipe1, recipe2, ...);
 // OR
 // recipe(recipe1, recipe2, ...)(entity);
-export function recipe<const E extends Entity, U = never>
-  (entity: E, ...recipes: Recipe<EntityClass<E, U>>[]): DeepReadonly<E, U>;
-export function recipe<const E extends Entity, U = never>
-  (...recipes: Recipe<EntityClass<E, U>>[]): (entity: E) => DeepReadonly<E, U>;
-export function recipe<const E extends Entity, U = never>
-  (...recipes: Recipe<EntityClass<E, U>>[]) {
+export function recipe<const T extends Recipe<EntityClass<E, U>, E, U>, const E extends Entity, U = never>
+  (entity: E, ...recipes: T[]): E;
+export function recipe<const T extends Recipe<EntityClass<E, U>, E, U>, const E extends Entity, U = never>
+  (...recipes: T[]): (entity: E) => E;
+export function recipe<const T extends Recipe<EntityClass<E, U>, E, U>, const E extends Entity, U = never>
+  (...recipes: T[]) {
 
-  const transform = (value: E, _recipes: typeof recipes): DeepReadonly<E, U> =>
+  const transform = (value: E, _recipes: typeof recipes): E =>
     _recipes.reduce(
       (_entity, rec) =>
         _entity.recipe(rec),
@@ -152,4 +152,14 @@ export function recipe<const E extends Entity, U = never>
   return recipes[0] instanceof Function
     ? (entity: E) => transform(entity, recipes)
     : transform(recipes[0], recipes.slice(1));
+  }
+
+// Alias for recipe(), asserted as DeepReadonly<T>.
+export function recipeSafe<const T extends Recipe<EntityClass<E, U>, E, U>, const E extends Entity, U = never>
+  (entity: E, ...recipes: T[]): DeepReadonly<E>;
+export function recipeSafe<const T extends Recipe<EntityClass<E, U>, E, U>, const E extends Entity, U = never>
+  (...recipes: T[]): (entity: E) => DeepReadonly<E>;
+export function recipeSafe<const T extends Recipe<EntityClass<E, U>, E, U>, const E extends Entity, U = never>
+  (...recipes: T[]) {
+    return recipe(recipes) as DeepReadonly<E>;
   }

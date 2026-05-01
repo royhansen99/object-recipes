@@ -41,7 +41,7 @@ Can be used in combination with:
 ### Basic usage
 
 ```typescript
-import { entity, Recipe, Shape } from 'object-recipes'
+import { entity, Recipe, Shape, ShapeSafe } from 'object-recipes'
 
 // Initialize the entity.
 const person = entity({
@@ -67,16 +67,13 @@ const person = entity({
 // you should instead use getClone() below.
 person.get();
 
+// Get a safer DeepReadonly variant of the plain js-object:
+person.getSafe();
+
 // Or retrieve a deep-copy of the plain object.
 // This way the object is not in any way connected
 // to the entity, since it is a deep-copy.
 person.getClone();
-
-// For performance, if you dont care about breaking
-// immutability, and you dont want the overhead of deep-cloning
-// with getClone(), you can use this method to get a mutable
-// variant of the plain js-object.
-person.getUnsafe();
 
 // Update one or more fields on the entity.
 // set() returns a new entity-instance with updated fields,
@@ -151,13 +148,13 @@ const recipeUpdate = person.recipe(
 // }
 type RealObject = Shape<typeof person>;
 
-// If you want the unsafe mutable version that you can get from getUnsafe():
-type RealUnsafeObject = ShapeUnsafe<typeof person>;
+// If you want a safer DeepReadonly variant of the underlying object:
+type RealObjectSafe = ShapeSafe<typeof person>;
 ```
 
 ### Type-checking performance
 ```typescript
-import { entity, Recipe, Shape } from 'object-recipes'
+import { entity } from 'object-recipes'
 import { DateTime } from 'luxon';
 
 // Deeply nested objects can slow down type-checking performance, therefore you have the option
@@ -173,7 +170,6 @@ const _item = {
 
 // Pass DateTime as the 2nd template argument, to prevent it from being visited when recursing.
 const item = entity<typeof item, DateTime>(item); 
-
 
 // You can set the root part of `DateTime`, however you can't set individual properties inside
 // it. Performance is now much better as the type-checker is prevented from accessing properties

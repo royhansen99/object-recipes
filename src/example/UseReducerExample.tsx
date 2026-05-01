@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import { entity, Shape, Recipe, recipe } from '../index';
+import { entity, Shape, Recipe, recipeSafe } from '../index';
 
 const personEntity = entity({
   name: 'John Doe',
@@ -36,8 +36,8 @@ type Actions = typeof nameAgeRecipe | typeof addressRecipe;
 export default function UseReducerExample() {
   const [{ name, age, address }, dispatch] = useReducer(
     (person, action: ReturnType<Actions>) =>
-      recipe(person, action),
-    personEntity.get()
+      recipeSafe(person, action),
+    personEntity.getSafe()
   );
 
   return (

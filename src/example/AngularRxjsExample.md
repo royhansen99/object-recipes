@@ -5,7 +5,7 @@ This example was created on Angular v20.3.0, and rxjs v7.8.0.
 ```ts
 /* src/state/person.ts  */
 
-import { entity, Recipe, Shape } from 'object-recipes';
+import { entity, Recipe, Shape, recipeSafe } from 'object-recipes';
 import { BehaviorSubject } from 'rxjs';
 
 export const personEntity = entity({
@@ -34,11 +34,11 @@ export const setAddressAction =
       address: { ...entity.get().address, ...values },
     });
 
-export const personState = new BehaviorSubject(personEntity.get());
+export const personState = new BehaviorSubject(personEntity.getSafe());
 
 export const personDispatch = (recipe: Recipe<typeof personEntity>) => {
   personState.next(
-    recipeHelper(recipe)(personState.value)
+    recipeSafe(recipe)(personState.value)
   );
 };
 

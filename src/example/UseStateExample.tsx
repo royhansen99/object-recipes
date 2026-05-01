@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { entity, Recipe, recipe } from '../index';
+import { entity, Recipe, recipeSafe } from '../index';
 
 const personEntity = entity({
   name: 'John Doe',
@@ -25,7 +25,7 @@ const addressRecipe =
     });
 
 export default function UseStateExample() {
-  const [{ name, age, address }, setPerson] = useState(personEntity.get());
+  const [{ name, age, address }, setPerson] = useState(personEntity.getSafe());
 
   return (
     <div>
@@ -35,7 +35,7 @@ export default function UseStateExample() {
         type="text"
         value={name}
         onChange={({ currentTarget: { value } }) =>
-          setPerson(recipe((p) => p.set({ name: value })))
+          setPerson(recipeSafe((p) => p.set({ name: value })))
         }
       />
       <br />
@@ -44,7 +44,7 @@ export default function UseStateExample() {
         type="text"
         value={isNaN(age) ? '' : age.toString()}
         onChange={({ currentTarget: { value } }) =>
-          setPerson(recipe((p) => p.set({ age: parseInt(value) })))
+          setPerson(recipeSafe((p) => p.set({ age: parseInt(value) })))
         }
       />
       <br />
@@ -56,7 +56,7 @@ export default function UseStateExample() {
         type="text"
         value={address.street}
         onChange={({ currentTarget: { value } }) =>
-          setPerson(recipe(addressRecipe({ street: value })))
+          setPerson(recipeSafe(addressRecipe({ street: value })))
         }
       />
       <br />
@@ -65,7 +65,7 @@ export default function UseStateExample() {
         type="text"
         value={isNaN(address.zip) ? '' : address.zip.toString()}
         onChange={({ currentTarget: { value } }) =>
-          setPerson(recipe(addressRecipe({ zip: parseInt(value) })))
+          setPerson(recipeSafe(addressRecipe({ zip: parseInt(value) })))
         }
       />
       <br />
@@ -74,7 +74,7 @@ export default function UseStateExample() {
         type="text"
         value={address.country}
         onChange={({ currentTarget: { value } }) =>
-          setPerson(recipe(addressRecipe({ country: value })))
+          setPerson(recipeSafe(addressRecipe({ country: value })))
         }
       />
       <br />
